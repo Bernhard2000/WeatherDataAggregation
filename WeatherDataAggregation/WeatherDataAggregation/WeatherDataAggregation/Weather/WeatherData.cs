@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
@@ -53,6 +54,7 @@ public class WeatherData
     //https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=Europe%2FBerlin
     public WeatherData(JsonNode json)
     {
+        Time = json["current"]["time"].ToString();
         Temperature = json["current"]["temperature_2m"].ToString();
         Precipitation = json["current"]["precipitation"].ToString();
         WindSpeed = json["current"]["wind_speed_10m"].ToString();
@@ -62,5 +64,36 @@ public class WeatherData
         Cloudiness = json["current"]["cloud_cover"].ToString();
         FeelsLike = json["current"]["apparent_temperature"].ToString();
         WindGust = json["current"]["wind_gusts_10m"].ToString();
+    }
+
+    public static WeatherData[] GetWeatherDataHourly(JsonNode json)
+    {
+        var time = json["hourly"]["time"].AsArray();
+        WeatherData[] weatherDataArr = new WeatherData[time.Count()];
+        if (time != null)
+        {
+            for (int i = 0; i < time.Count; i++)
+            {
+                WeatherData weatherData = new WeatherData();
+                
+                JsonNode? temperature2m, relativeHumidity2m, dewPoint2m, apparentTemperature, precipitationProbability, precipitation = null;
+                if(json["hourly"]["temperature_2m"] != null)
+                    weatherData.Temperature = json["hourly"]["temperature_2m"][i].ToString();
+                if (json["hourly"]["relative_humidity_2m"] != null)
+                    weatherData.Humidity = json["hourly"]["relative_humidity_2m"][i].ToString();
+                if (json["hourly"]["dew_point_2m"] != null)
+                    weatherData.DewPoint = json["hourly"]["dew_point_2m"][i].ToString();
+                if (json["hourly"]["apparent_temperature"] != null)
+                    weatherData.FeelsLike = json["hourly"]["apparent_temperature"][i].ToString();
+                if (json["hourly"]["precipitation_probability"] != null)
+                    weatherData.Precipitation = json["hourly"]["precipitation_probability"][i].ToString();
+
+                weatherData.Time = time[i].ToString();
+
+                weatherDataArr[i] = weatherData;
+            }
+        }
+
+        return weatherDataArr;
     }
 }

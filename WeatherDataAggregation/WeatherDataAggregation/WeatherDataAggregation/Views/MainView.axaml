@@ -12,9 +12,27 @@
     <vm:MainViewModel />
   </Design.DataContext>
     <StackPanel>
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+            <TextBox Margin="5 5 0 5" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+            <Button Margin="5" Click="SearchLocation">Search</Button>
+        </StackPanel>
+        <ComboBox Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
         <TextBlock Text="Weather Data Aggregation" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Content="Refresh" Command="{Binding RefreshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <DataGrid ></DataGrid>
+        <DataGrid Height="800" IsReadOnly="True" ItemsSource="{Binding WeatherDataList}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Time" Binding="{Binding Time}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Temperature" Binding="{Binding Temperature}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Pressure" Binding="{Binding Pressure}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Humidity" Binding="{Binding Humidity}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Wind Speed" Binding="{Binding WindSpeed}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Wind Gust" Binding="{Binding WindGust}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Precipitation" Binding="{Binding Precipitation}"></DataGridTextColumn>
+                <DataGridTextColumn Header="Cloudiness" Binding="{Binding Cloudiness}"></DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        
         
     </StackPanel>
+    
 </UserControl>
