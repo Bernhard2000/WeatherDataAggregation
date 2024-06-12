@@ -32,4 +32,10 @@ public partial class MainView : UserControl
         });
         viewModel.LocationSearchQuery = "";
     }
+
+    private void FetchOpenWeatherMapTest(object? sender, RoutedEventArgs e)
+    {
+        viewModel = DataContext as MainViewModel;
+        OpenWeatherMap.fetchCurrentData(viewModel.SelectedLocation);
+    }
 }

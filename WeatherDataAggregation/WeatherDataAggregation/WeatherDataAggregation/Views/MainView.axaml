@@ -12,11 +12,14 @@
     <vm:MainViewModel />
   </Design.DataContext>
     <StackPanel>
-        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-            <TextBox Margin="5 5 0 5" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
-            <Button Margin="5" Click="SearchLocation">Search</Button>
+        <StackPanel HorizontalAlignment="Right" Orientation="Vertical">
+            <StackPanel  Orientation="Horizontal">
+                <TextBox Margin="5 5 0 5" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+                <Button Margin="5" Click="SearchLocation">Search</Button>
+            </StackPanel>
+            <ComboBox Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
         </StackPanel>
-        <ComboBox Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
+        <Button Click="FetchOpenWeatherMapTest">Test OpenWeatherMap fetching</Button>
         <TextBlock Text="Weather Data Aggregation" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Content="Refresh" Command="{Binding RefreshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <DataGrid Height="800" IsReadOnly="True" ItemsSource="{Binding WeatherDataList}" HorizontalAlignment="Center" VerticalAlignment="Center">
