@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -29,8 +30,8 @@ public static class GeoCoding
                 {
                     Location loc = new Location();
                     loc.Name = result["display_name"].ToString();
-                    loc.Latitude = Double.Parse(result["lat"].ToString());
-                    loc.Longitude = Double.Parse(result["lon"].ToString());
+                    loc.Latitude = Double.Parse(result["lat"].ToString(), CultureInfo.InvariantCulture);
+                    loc.Longitude = Double.Parse(result["lon"].ToString(), CultureInfo.InvariantCulture);
                     locations.Add(loc);
                 }
                 
