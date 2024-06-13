@@ -7,6 +7,12 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WeatherDataAggregation.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="WeatherDataAggregation">
-        <views:MainView />
+        Title="WeatherDataAggregation"
+        x:DataType="vm:MainWindowViewModel">
+        <Design.DataContext>
+                <vm:MainWindowViewModel />
+        </Design.DataContext>
+        <DockPanel>
+                <views:MainView />
+        </DockPanel>
 </Window>

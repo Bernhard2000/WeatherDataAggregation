@@ -6,6 +6,7 @@
         <entry key="WeatherDataAggregation/WeatherDataAggregation/App.axaml" value="WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj" />
         <entry key="WeatherDataAggregation/WeatherDataAggregation/Views/MainView.axaml" value="WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj" />
         <entry key="WeatherDataAggregation/WeatherDataAggregation/Views/MainWindow.axaml" value="WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj" />
+        <entry key="WeatherDataAggregation/WeatherDataAggregation/Views/SettingsView.axaml" value="WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj" />
       </map>
     </option>
   </component>

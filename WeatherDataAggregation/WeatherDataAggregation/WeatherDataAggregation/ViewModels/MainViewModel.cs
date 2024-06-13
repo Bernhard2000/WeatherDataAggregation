@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Net.Http;
@@ -21,6 +22,7 @@ public class MainViewModel : ViewModelBase
     private string api_request =
         "https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&hourly=temperature_2m&past_days=1&forecast_days=1";
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+    public ReactiveCommand<Unit, Unit> SearchLocationCommand { get; }
 
     private string _locationSearchQuery = "";
 
@@ -29,6 +31,20 @@ public class MainViewModel : ViewModelBase
         get => _locationSearchQuery;
 
         set => this.RaiseAndSetIfChanged(ref _locationSearchQuery, value);
+    }
+    
+    private DateTimeOffset _dateFrom = DateTimeOffset.Now - new TimeSpan(7, 0, 0, 0);
+    public DateTimeOffset DateFrom
+    {
+        get => _dateFrom;
+        set => this.RaiseAndSetIfChanged(ref _dateFrom, value);
+    }
+
+    private DateTimeOffset _dateTo = DateTimeOffset.Now;
+    public DateTimeOffset DateTo
+    {
+        get => _dateTo;
+        set => this.RaiseAndSetIfChanged(ref _dateTo, value);
     }
     
     private Location _selectedLocation = new Location { Name = "Linz", Latitude = 48.3064, Longitude = 14.2861 };
@@ -43,13 +59,33 @@ public class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         RefreshCommand = ReactiveCommand.CreateFromTask(GetWeatherDataAsync);
+        SearchLocationCommand = ReactiveCommand.Create(SearchLocation);
     }
     
 
     public ObservableCollection<WeatherData> WeatherDataList { get; set; } = new ObservableCollection<WeatherData>();
     
+    private void SearchLocation()
+    {
+        
+        GeoCoding.GetLocationAsync(LocationSearchQuery).ContinueWith((result) =>
+        {
+            if(result.Status == TaskStatus.Faulted)
+            {
+                return;
+            }
+            LocationSearchResults.Clear();
+            foreach (var location in result.Result)
+            {
+                LocationSearchResults.Add(location);
+            }
+            SelectedLocation = LocationSearchResults[0];
+        });
+        LocationSearchQuery = "";
+    }
     public async Task GetWeatherDataAsync()
     {
+        
         WeatherDataList.Clear();
         using HttpClient client = new HttpClient();
         //HttpResponseMessage response = await client.GetAsync("https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=Europe%2FBerlin");
