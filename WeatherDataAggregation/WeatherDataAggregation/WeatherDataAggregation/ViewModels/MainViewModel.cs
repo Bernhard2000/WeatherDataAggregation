@@ -2,12 +2,21 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Reactive;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Avalonia;
 using DynamicData;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using ReactiveUI;
+using SkiaSharp;
+using WeatherDataAggregation.Views;
 using WeatherDataAggregation.Weather;
 
 namespace WeatherDataAggregation.ViewModels;
@@ -46,7 +55,22 @@ public class MainViewModel : ViewModelBase
         get => _dateTo;
         set => this.RaiseAndSetIfChanged(ref _dateTo, value);
     }
+
+    private ISeries[] _temperatureLines = new ISeries[] { };
+    public ISeries[] TemperatureLines
+    {
+        get => _temperatureLines;
+        set  => this.RaiseAndSetIfChanged(ref _temperatureLines, value);
+        
+    }
     
+    private ISeries[] _averageTemperatures = new ISeries[] { };
+    public ISeries[] AverageTemperatures
+    {
+        get => _averageTemperatures;
+        set => this.RaiseAndSetIfChanged(ref _averageTemperatures, value);
+    }
+
     private Location _selectedLocation = new Location { Name = "Linz", Latitude = 48.3064, Longitude = 14.2861 };
     public Location SelectedLocation
     {
@@ -102,6 +126,32 @@ public class MainViewModel : ViewModelBase
                 {
                     WeatherDataList.Add(weatherData);
                 }
+                // Plot the temperature data
+                var temperatures = WeatherDataList.Select(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture)).ToArray();
+                var times = WeatherDataList.Select(wd => wd.Time).ToArray();
+
+                var series = new LineSeries<double>
+                {
+                    Values = new ObservableCollection<double>(temperatures),
+                    Stroke = new SolidColorPaint(new SKColor(255, 0, 0)),
+                    Fill = new SolidColorPaint(new SKColor(255, 0, 0, 100)),
+                    GeometrySize = 15,
+                    GeometryStroke = new SolidColorPaint(new SKColor(255, 255, 255)),
+                    GeometryFill = new SolidColorPaint(new SKColor(255, 0, 0)),
+                };
+                var linesList = TemperatureLines.ToList();
+                linesList.Add(series);
+                TemperatureLines = linesList.ToArray();
+                
+                var columnSeries = new ColumnSeries<double>
+                {
+                    Values = new ObservableCollection<double> { temperatures.Average() },
+                    Stroke = new SolidColorPaint(new SKColor(0, 0, 255)),
+                    Fill = new SolidColorPaint(new SKColor(0, 0, 255, 100)),
+                    MaxBarWidth = 50,
+                };
+
+                AverageTemperatures = new ISeries[] { columnSeries };
             }
         }
     }

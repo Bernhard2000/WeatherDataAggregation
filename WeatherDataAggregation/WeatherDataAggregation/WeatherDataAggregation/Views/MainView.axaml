@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:WeatherDataAggregation.ViewModels"
+             xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WeatherDataAggregation.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -11,38 +12,54 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
-    <StackPanel>
-        <DockPanel>
-            <StackPanel DockPanel.Dock="Left" HorizontalAlignment="Left">
-                <Label Content="From Date:" />
-                <DatePicker SelectedDate="{Binding DateFrom}"></DatePicker>
-                <Label Content="To Date:" />
-                <DatePicker SelectedDate="{Binding DateTo}"></DatePicker>
-            </StackPanel>
-            <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <TextBox Margin="5 5 0 5" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
-                    <Button Margin="5" Command="{Binding SearchLocationCommand}">Search</Button>
+    <ScrollViewer>
+        <StackPanel>
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" HorizontalAlignment="Left">
+                    <Label Content="From Date:" />
+                    <DatePicker SelectedDate="{Binding DateFrom}"></DatePicker>
+                    <Label Content="To Date:" />
+                    <DatePicker SelectedDate="{Binding DateTo}"></DatePicker>
+                    <Label Content="Vergleich mit"></Label>
+                    <ComboBox>
+                        <ComboBoxItem>Dieses Jahr</ComboBoxItem>
+                        <ComboBoxItem>2 Jahre</ComboBoxItem>
+                        <ComboBoxItem>3 Jahre</ComboBoxItem>
+                        <ComboBoxItem>4 Jahre</ComboBoxItem>
+                        <ComboBoxItem>5 Jahre</ComboBoxItem>
+                        <ComboBoxItem>10 Jahre</ComboBoxItem>
+                        <ComboBoxItem>15 Jahre</ComboBoxItem>
+                        <ComboBoxItem>20 Jahre</ComboBoxItem>
+                        <ComboBoxItem>30 Jahre</ComboBoxItem>
+                        <ComboBoxItem>40 Jahre</ComboBoxItem>
+                        <ComboBoxItem>50 Jahre</ComboBoxItem>
+                    </ComboBox>
                 </StackPanel>
-                <ComboBox HorizontalAlignment="Right" Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
-            </StackPanel>
-        </DockPanel>
-        <TextBlock Text="Weather Data Aggregation" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Content="Refresh" Command="{Binding RefreshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <DataGrid Height="800" IsReadOnly="True" ItemsSource="{Binding WeatherDataList}" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Time" Binding="{Binding Time}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Temperature" Binding="{Binding Temperature}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Pressure" Binding="{Binding Pressure}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Humidity" Binding="{Binding Humidity}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Wind Speed" Binding="{Binding WindSpeed}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Wind Gust" Binding="{Binding WindGust}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Precipitation" Binding="{Binding Precipitation}"></DataGridTextColumn>
-                <DataGridTextColumn Header="Cloudiness" Binding="{Binding Cloudiness}"></DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-        
-        
-    </StackPanel>
-    
+                <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" Orientation="Vertical">
+                    <StackPanel HorizontalAlignment="Right"  Orientation="Horizontal">
+                        <TextBox Margin="5 5 0 5" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+                        <Button Margin="5" Command="{Binding SearchLocationCommand}">Search</Button>
+                    </StackPanel>
+                    <ComboBox Margin="5" HorizontalAlignment="Right" Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
+                </StackPanel>
+            </DockPanel>
+            <TextBlock Text="Weather Data Aggregation" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Button Content="Refresh" Command="{Binding RefreshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <!--  <DataGrid Height="800" IsReadOnly="True" ItemsSource="{Binding WeatherDataList}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Time}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Temperature" Binding="{Binding Temperature}"></DataGridTextColumn>
+                   <DataGridTextColumn Header="Pressure" Binding="{Binding Pressure}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Humidity" Binding="{Binding Humidity}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Wind Speed" Binding="{Binding WindSpeed}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Wind Gust" Binding="{Binding WindGust}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Precipitation" Binding="{Binding Precipitation}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="Cloudiness" Binding="{Binding Cloudiness}"></DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>-->
+            <avalonia:CartesianChart x:Name="TemperatureLines" Height="800" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}"/>
+            <avalonia:CartesianChart x:Name="AverageTemp" Height="800" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}"/>
+        </StackPanel>
+    </ScrollViewer>
+
 </UserControl>

@@ -52,19 +52,6 @@ public class WeatherData
     }
     
     //https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=Europe%2FBerlin
-    public WeatherData(JsonNode json)
-    {
-        Time = json["current"]["time"].ToString();
-        Temperature = json["current"]["temperature_2m"].ToString();
-        Precipitation = json["current"]["precipitation"].ToString();
-        WindSpeed = json["current"]["wind_speed_10m"].ToString();
-        Humidity = json["current"]["relative_humidity_2m"].ToString();
-        Pressure = json["current"]["pressure_msl"].ToString();
-        SurfacePressure = json["current"]["surface_pressure"].ToString();
-        Cloudiness = json["current"]["cloud_cover"].ToString();
-        FeelsLike = json["current"]["apparent_temperature"].ToString();
-        WindGust = json["current"]["wind_gusts_10m"].ToString();
-    }
 
     public static WeatherData[] GetWeatherDataHourly(JsonNode json)
     {
