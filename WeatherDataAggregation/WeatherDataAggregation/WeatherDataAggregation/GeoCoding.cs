@@ -32,6 +32,7 @@ public static class GeoCoding
                     loc.Name = result["display_name"].ToString();
                     loc.Latitude = Double.Parse(result["lat"].ToString(), CultureInfo.InvariantCulture);
                     loc.Longitude = Double.Parse(result["lon"].ToString(), CultureInfo.InvariantCulture);
+                    loc.ShortName = result["display_name"].ToString().Split(",")[0] +  ", " + result["display_name"].ToString().Split(",")[1];
                     locations.Add(loc);
                 }
                 
