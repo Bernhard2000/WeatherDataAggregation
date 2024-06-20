@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.Primitives;
+using Avalonia.Threading;
 using DynamicData;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
@@ -47,14 +48,14 @@ public class MainViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _locationSearchQuery, value);
     }
     
-    private DateTimeOffset _dateFrom = DateTimeOffset.Now - new TimeSpan(7, 0, 0, 0);
+    private DateTimeOffset _dateFrom = DateTimeOffset.Now - new TimeSpan(19, 0, 0, 0);
     public DateTimeOffset DateFrom
     {
         get => _dateFrom;
         set => this.RaiseAndSetIfChanged(ref _dateFrom, value);
     }
 
-    private DateTimeOffset _dateTo = DateTimeOffset.Now;
+    private DateTimeOffset _dateTo = DateTimeOffset.Now - TimeSpan.FromDays(5);
     public DateTimeOffset DateTo
     {
         get => _dateTo;
@@ -145,9 +146,17 @@ public class MainViewModel : ViewModelBase
         RefreshCommand = ReactiveCommand.Create(AddLocation);
         SearchLocationCommand = ReactiveCommand.Create(SearchLocation);
         CompareYearsCommand = ReactiveCommand.CreateFromTask(CompareYearsAsync);
+        
+        this.WhenAnyValue(x => x.DateFrom, x => x.DateTo)
+            .Subscribe(_ => OnDateChanged());
     }
     
-
+    private void OnDateChanged()
+    {
+        TemperatureLines = new ISeries[] { };
+        AverageTemperatures = new ISeries[] { };
+        Parallel.ForEach(Locations, location => GetWeatherData(location));
+    }
     public ObservableCollection<WeatherData> WeatherDataList { get; set; } = new ObservableCollection<WeatherData>();
     
     private void SearchLocation()
@@ -170,25 +179,15 @@ public class MainViewModel : ViewModelBase
     }
     
     public ObservableCollection<Location> Locations { get; set; } = new ObservableCollection<Location>();
-
-    private void RemoveLocation(Location location)
-    {
-        
-        
-        
-        
-        
-    }
     
     public void AddLocation()
     {
         Locations.Add(SelectedLocation);
-        GetWeatherDataAsync(SelectedLocation).Start();
+        GetWeatherData(SelectedLocation);
     }
-    
-    
 
-    public async Task GetWeatherDataAsync(Location location)
+    
+    public async void GetWeatherData(Location location)
     {
         XAxes.First().Name = "Datum";
         WeatherDataList.Clear();
@@ -201,14 +200,17 @@ public class MainViewModel : ViewModelBase
 
         DateTime from = DateFrom.DateTime;
         DateTime to = DateTo.DateTime;
-        do
+
+
+        try
         {
-            
-            from = from - new TimeSpan(365, 0, 0, 0);
-            to = to - new TimeSpan(365, 0, 0, 0);
-            j++;
-        
-        historicData = await Open_Meteo.fetchHistoricDataHourly(location, from, to);
+            historicData = await Open_Meteo.fetchHistoricDataHourly(location, from, to);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return;
+        }
 
         foreach (var weatherData in historicData)
         {
@@ -256,13 +258,17 @@ public class MainViewModel : ViewModelBase
             Fill = null,
             GeometrySize = 0,
             GeometryStroke = new SolidColorPaint(randomColor),
-            GeometryFill = new SolidColorPaint(new SKColor(255, 0, 0)),
+            GeometryFill = new SolidColorPaint(randomColor),
             Name = SelectedLocation.ShortName
         };
         
-        var linesList = TemperatureLines.ToList();
-        linesList.Add(series);
-        TemperatureLines = linesList.ToArray();
+      
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var linesList = TemperatureLines.ToList();
+            linesList.Add(series);
+            TemperatureLines = linesList.ToArray();
+        });
         
         
         /*
@@ -341,10 +347,13 @@ foreach (var average in dailyAverages)
             MaxBarWidth = 10,
         };
 
-            var averagesList = AverageTemperatures.ToList();
-            averagesList.Add(columnSeries);
-            AverageTemperatures = averagesList.ToArray();        
-        } while (j < years);
+           
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                var averagesList = AverageTemperatures.ToList();
+                averagesList.Add(columnSeries);
+                AverageTemperatures = averagesList.ToArray();        
+            });
     }
     
     public static SKColor GenerateRandomColor()
@@ -356,7 +365,7 @@ foreach (var average in dailyAverages)
         return new SKColor(red, green, blue);
     }
     
-    public void RemoveLocation(string name)
+    public async Task RemoveLocation(string name)
     {
         var location = Locations.FirstOrDefault(l => l.ShortName == name);
         if (location != null)

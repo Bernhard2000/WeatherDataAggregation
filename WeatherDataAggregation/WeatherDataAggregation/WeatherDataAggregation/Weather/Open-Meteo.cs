@@ -32,9 +32,13 @@ public static class Open_Meteo
 
     public static  async Task<WeatherData[]> fetchHistoricDataHourly(Location location, DateTime startDate, DateTime endDate)
     {
+        if (DateTime.Now - endDate < TimeSpan.FromDays(5))
+        {
+            throw new ArgumentException("End date must be at least 5 days in the past");
+        }
                 using HttpClient client = new HttpClient();
                 var uri = new Uri(base_url,
-                    $"archive?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}&hourly=temperature_2m");
+                    $"archive?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}&hourly=temperature_2m&timezone=auto");
                 HttpResponseMessage response = await client.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
