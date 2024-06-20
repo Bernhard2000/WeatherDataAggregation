@@ -14,5 +14,11 @@ public partial class MainView : UserControl
     }
 
 
-    
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        viewModel = DataContext as MainViewModel;
+
+        string locationName = (sender as Button).Tag as string;
+        viewModel.RemoveLocation(locationName);
+    }
 }

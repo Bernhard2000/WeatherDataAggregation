@@ -8,10 +8,14 @@ using System.Net.Http;
 using System.Reactive;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls.Primitives;
 using DynamicData;
 using LiveChartsCore;
+using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using ReactiveUI;
@@ -32,6 +36,7 @@ public class MainViewModel : ViewModelBase
         "https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&hourly=temperature_2m&past_days=1&forecast_days=1";
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
     public ReactiveCommand<Unit, Unit> SearchLocationCommand { get; }
+
 
     private string _locationSearchQuery = "";
 
@@ -77,6 +82,61 @@ public class MainViewModel : ViewModelBase
         get => _selectedLocation;
         set => this.RaiseAndSetIfChanged(ref _selectedLocation, value);
     }
+
+
+
+    public bool SelectedOpenMeteo { get; set; }    
+    public bool SelectedOpenWeatherMap { get; set; }
+    public Axis[] XAxes { get; set; } =
+    {
+        new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy"))
+    };
+    
+    
+    public Axis[] XAxesAverages { get; set; } =
+    {
+        new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy"))
+    };
+
+    private ObservableCollection<string> _compareYears = new ObservableCollection<string>
+    {
+        "Dieses Jahr",
+        "2 Jahre",
+        "3 Jahre",
+        "4 Jahre",
+        "5 Jahre",
+        "10 Jahre",
+        "15 Jahre",
+        "20 Jahre",
+        "30 Jahre",
+        "40 Jahre",
+        "50 Jahre"
+    };
+    public ObservableCollection<string> CompareYears
+    {
+        get => _compareYears;
+        set => this.RaiseAndSetIfChanged(ref _compareYears, value);
+    }
+
+    private string _compareYearsSelection = "Dieses Jahr";
+    public string CompareYearsSelection
+    {
+        get => _compareYearsSelection;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _compareYearsSelection, value);
+            CompareYearsCommand.Execute().Subscribe();
+        }
+    }
+
+    public ReactiveCommand<Unit, Unit> CompareYearsCommand { get; }
+
+    private async Task CompareYearsAsync()
+    {
+        // Update the TemperatureLines and AverageTemperatures properties based on the selected year
+        // This is just a placeholder. You need to implement the actual logic.
+    }
+    
     public ObservableCollection<Location> LocationSearchResults { get; set; } = new ObservableCollection<Location>();
 
     
@@ -84,6 +144,7 @@ public class MainViewModel : ViewModelBase
     {
         RefreshCommand = ReactiveCommand.CreateFromTask(GetWeatherDataAsync);
         SearchLocationCommand = ReactiveCommand.Create(SearchLocation);
+        CompareYearsCommand = ReactiveCommand.CreateFromTask(CompareYearsAsync);
     }
     
 
@@ -107,53 +168,190 @@ public class MainViewModel : ViewModelBase
         });
         LocationSearchQuery = "";
     }
+    
+    public ObservableCollection<Location> Locations { get; set; } = new ObservableCollection<Location>();
+
+    private void RemoveLocation(Location location)
+    {
+        Locations.Remove(location);
+    }
+
     public async Task GetWeatherDataAsync()
     {
-        
+        Locations.Add(SelectedLocation);
+        XAxes.First().Name = "Datum";
         WeatherDataList.Clear();
-        using HttpClient client = new HttpClient();
-        //HttpResponseMessage response = await client.GetAsync("https://api.open-meteo.com/v1/forecast?latitude=48.3064&longitude=14.2861&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=Europe%2FBerlin");
-        HttpResponseMessage response = await client.GetAsync(api_request);
+        //foreach (var weatherData in WeatherData.GetWeatherDataHourly(json))
+       
+        WeatherData[] historicData;
+        int years = 0;
+        int.TryParse(CompareYearsSelection.Split(' ')[0], out years);
+        int j= 0;
 
-        response.EnsureSuccessStatusCode();
-        if (response.IsSuccessStatusCode)
+        DateTime from = DateFrom.DateTime;
+        DateTime to = DateTo.DateTime;
+        do
         {
-            string responseBody = await response.Content.ReadAsStringAsync();
-            JsonNode json = JsonNode.Parse(responseBody);
-            if (json != null)
+            
+            from = from - new TimeSpan(365, 0, 0, 0);
+            to = to - new TimeSpan(365, 0, 0, 0);
+            j++;
+        
+        historicData = await Open_Meteo.fetchHistoricDataHourly(SelectedLocation, from, to);
+
+        foreach (var weatherData in historicData)
+        {
+            if (!double.TryParse(weatherData.Temperature, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
             {
-                foreach (var weatherData in WeatherData.GetWeatherDataHourly(json))
-                {
-                    WeatherDataList.Add(weatherData);
-                }
-                // Plot the temperature data
-                var temperatures = WeatherDataList.Select(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture)).ToArray();
-                var times = WeatherDataList.Select(wd => wd.Time).ToArray();
-
-                var series = new LineSeries<double>
-                {
-                    Values = new ObservableCollection<double>(temperatures),
-                    Stroke = new SolidColorPaint(new SKColor(255, 0, 0)),
-                    Fill = new SolidColorPaint(new SKColor(255, 0, 0, 100)),
-                    GeometrySize = 15,
-                    GeometryStroke = new SolidColorPaint(new SKColor(255, 255, 255)),
-                    GeometryFill = new SolidColorPaint(new SKColor(255, 0, 0)),
-                };
-                var linesList = TemperatureLines.ToList();
-                linesList.Add(series);
-                TemperatureLines = linesList.ToArray();
-                
-                var columnSeries = new ColumnSeries<double>
-                {
-                    Values = new ObservableCollection<double> { temperatures.Average() },
-                    Stroke = new SolidColorPaint(new SKColor(0, 0, 255)),
-                    Fill = new SolidColorPaint(new SKColor(0, 0, 255, 100)),
-                    MaxBarWidth = 50,
-                };
-
-                AverageTemperatures = new ISeries[] { columnSeries };
+                continue;
             }
+
+            WeatherDataList.Add(weatherData);
+        }
+        SKColor randomColor = GenerateRandomColor();
+
+        // Plot the temperature data
+        var temperatures = WeatherDataList.Select(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture))
+            .ToArray();
+        var times = WeatherDataList.Select(wd => wd.Time).ToArray();
+        
+        //XAxis = new DateTimeAxis(TimeSpan.FromDays(1), time => time.ToString("dd.MM.yyyy"));
+        
+
+        /*while (temperatures.Length > 10000)
+        {
+            var averagedTemperatures = new List<double>();
+            for (int i = 0; i < temperatures.Length -2; i += 3)
+            {
+                double average = (temperatures[i] + temperatures[i + 1] + temperatures[i + 2]) / 3;
+                averagedTemperatures.Add(average);
+            }
+            temperatures = averagedTemperatures.ToArray();
+        }*/
+        
+        var timepoints = new ObservableCollection<DateTimePoint>();
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepoints.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures[i],
+            });
+        }
+        var series = new LineSeries<DateTimePoint>
+        {
+            Values =timepoints,
+            Stroke = new SolidColorPaint(randomColor),
+            Fill = null,
+            GeometrySize = 0,
+            GeometryStroke = new SolidColorPaint(randomColor),
+            GeometryFill = new SolidColorPaint(new SKColor(255, 0, 0)),
+            Name = SelectedLocation.ShortName
+        };
+        
+        var linesList = TemperatureLines.ToList();
+        linesList.Add(series);
+        TemperatureLines = linesList.ToArray();
+        
+        
+        /*
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepointsAverages.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures.Average()
+            });
+        }
+
+        var columnSeries = new ColumnSeries<DateTimePoint>
+        {
+            Values = new ObservableCollection<DateTimePoint> { timepointsAverages },
+            Stroke = new SolidColorPaint(new SKColor(0, 0, 255)),
+            Fill = new SolidColorPaint(new SKColor(0, 0, 255, 100)),
+            MaxBarWidth = 50,
+        };
+        
+        var averageList = AverageTemperatures.ToList()
+
+        AverageTemperatures = new ISeries[] { columnSeries };*/
+        
+        var timepointsAverages = new ObservableCollection<DateTimePoint>();
+/*
+        // Group WeatherDataList by month and calculate the average temperature for each month
+        var monthlyAverages = WeatherDataList
+            .GroupBy(wd => new DateTime(DateTime.Parse(wd.Time).Year, DateTime.Parse(wd.Time).Month, 1))
+            .Select(g => new
+            {
+                Month = g.Key,
+                AverageTemperature = g.Average(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture))
+            });
+        
+// Clear the existing timepointsAverages
+        timepointsAverages.Clear();
+
+// Add a new DateTimePoint for each month to timepointsAverages
+        foreach (var monthlyAverage in monthlyAverages)
+        {
+            timepointsAverages.Add(new DateTimePoint
+            {
+                DateTime = monthlyAverage.Month,
+                Value = monthlyAverage.AverageTemperature
+            });
+        }
+        */
+
+var dailyAverages = WeatherDataList
+    .GroupBy(wd => new DateTime(DateTime.Parse(wd.Time).Year, DateTime.Parse(wd.Time).Month, DateTime.Parse(wd.Time).Day))
+    .Select(g => new
+    {
+        Day = g.Key,
+        AverageTemperature = g.Average(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture))
+    });
+
+timepointsAverages.Clear();
+
+foreach (var average in dailyAverages)
+{
+    timepointsAverages.Add(new DateTimePoint
+    {
+        DateTime = average.Day,
+        Value = average.AverageTemperature
+    });
+}
+//TODO replace datetimepoint with only month
+// Create a new ColumnSeries with timepointsAverages
+        var columnSeries = new ColumnSeries<DateTimePoint>
+        {
+            Values = timepointsAverages,
+            Stroke = new SolidColorPaint(randomColor),
+            Fill = new SolidColorPaint(randomColor),
+            MaxBarWidth = 10,
+        };
+
+            var averagesList = AverageTemperatures.ToList();
+            averagesList.Add(columnSeries);
+            AverageTemperatures = averagesList.ToArray();        
+        } while (j < years);
+    }
+    
+    public static SKColor GenerateRandomColor()
+    {
+        Random random = new Random();
+        byte red = (byte)random.Next(256);
+        byte green = (byte)random.Next(256);
+        byte blue = (byte)random.Next(256);
+        return new SKColor(red, green, blue);
+    }
+    
+    public void RemoveLocation(string name)
+    {
+        var location = Locations.FirstOrDefault(l => l.ShortName == name);
+        if (location != null)
+        {
+            Locations.Remove(location);
         }
     }
 #pragma warning restore CA1822 // Mark members as static
 }
+
