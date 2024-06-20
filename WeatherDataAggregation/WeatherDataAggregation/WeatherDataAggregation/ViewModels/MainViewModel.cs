@@ -142,7 +142,7 @@ public class MainViewModel : ViewModelBase
     
     public MainViewModel()
     {
-        RefreshCommand = ReactiveCommand.CreateFromTask(GetWeatherDataAsync);
+        RefreshCommand = ReactiveCommand.Create(AddLocation);
         SearchLocationCommand = ReactiveCommand.Create(SearchLocation);
         CompareYearsCommand = ReactiveCommand.CreateFromTask(CompareYearsAsync);
     }
@@ -173,12 +173,23 @@ public class MainViewModel : ViewModelBase
 
     private void RemoveLocation(Location location)
     {
-        Locations.Remove(location);
+        
+        
+        
+        
+        
     }
-
-    public async Task GetWeatherDataAsync()
+    
+    public void AddLocation()
     {
         Locations.Add(SelectedLocation);
+        GetWeatherDataAsync(SelectedLocation).Start();
+    }
+    
+    
+
+    public async Task GetWeatherDataAsync(Location location)
+    {
         XAxes.First().Name = "Datum";
         WeatherDataList.Clear();
         //foreach (var weatherData in WeatherData.GetWeatherDataHourly(json))
@@ -197,7 +208,7 @@ public class MainViewModel : ViewModelBase
             to = to - new TimeSpan(365, 0, 0, 0);
             j++;
         
-        historicData = await Open_Meteo.fetchHistoricDataHourly(SelectedLocation, from, to);
+        historicData = await Open_Meteo.fetchHistoricDataHourly(location, from, to);
 
         foreach (var weatherData in historicData)
         {
@@ -323,6 +334,7 @@ foreach (var average in dailyAverages)
 // Create a new ColumnSeries with timepointsAverages
         var columnSeries = new ColumnSeries<DateTimePoint>
         {
+            Name = location.ShortName,
             Values = timepointsAverages,
             Stroke = new SolidColorPaint(randomColor),
             Fill = new SolidColorPaint(randomColor),
@@ -349,7 +361,16 @@ foreach (var average in dailyAverages)
         var location = Locations.FirstOrDefault(l => l.ShortName == name);
         if (location != null)
         {
-            Locations.Remove(location);
+            Locations.Remove(location);                                                                            
+            var toremove = AverageTemperatures.Where(t => t.Name == location.ShortName).First();                   
+            var averageTemperaturesList = AverageTemperatures.ToList();                                            
+            averageTemperaturesList.Remove(toremove);                                                              
+            AverageTemperatures = averageTemperaturesList.ToArray();                 
+            
+            var toremove2 = TemperatureLines.Where(t => t.Name == location.ShortName).First();
+            var temperatureLinesList = TemperatureLines.ToList();
+            temperatureLinesList.Remove(toremove2);
+            TemperatureLines = temperatureLinesList.ToArray();
         }
     }
 #pragma warning restore CA1822 // Mark members as static
