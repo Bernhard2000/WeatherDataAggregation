@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using WeatherDataAggregation.Weather;
 
 namespace WeatherDataAggregation;
@@ -8,7 +9,7 @@ namespace WeatherDataAggregation;
 public static class OpenWeatherMap
 {
     private static string api_key = "eee42da2ff38bfd2b56e79ab96d2250a";
-    
+
     private static Uri base_url = new Uri("https://api.openweathermap.org/data/2.5/");
 
     public static WeatherData fetchCurrentData(Location location)
@@ -29,6 +30,7 @@ public static class OpenWeatherMap
             data.Cloudiness = json["clouds"]["all"].ToString();
             data.WeatherDescription = json["weather"][0]["description"].ToString();
         }
+
         return data;
     }
 }
