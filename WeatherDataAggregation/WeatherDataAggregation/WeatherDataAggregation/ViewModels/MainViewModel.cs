@@ -155,7 +155,38 @@ public class MainViewModel : ViewModelBase
     {
         TemperatureLines = new ISeries[] { };
         AverageTemperatures = new ISeries[] { };
-        Parallel.ForEach(Locations, location => GetWeatherData(location));
+
+        var tempTemperatureLines = new List<ISeries>();
+        var tempAverageTemperatures = new List<ISeries>();
+
+        var loopResult = Parallel.ForEach(Locations, location =>
+        {
+            var historicData = FetchWeatherData(location).Result;
+            if (historicData == null)
+            {
+                return;
+            }
+
+            var color = GenerateRandomColor();
+            var temperatureSeries = CalculateTemperatureSeries(historicData, color);
+            var averageTemperatureColumns = CalculateAverageTemperatureColumns(historicData, color);
+
+            lock (tempTemperatureLines)
+            {
+                tempTemperatureLines.Add(temperatureSeries);
+            }
+
+            lock (tempAverageTemperatures)
+            {
+                tempAverageTemperatures.Add(averageTemperatureColumns);
+            }
+        });
+
+        if (loopResult.IsCompleted)
+        {
+            TemperatureLines = tempTemperatureLines.ToArray();
+            AverageTemperatures = tempAverageTemperatures.ToArray();
+        }
     }
     public ObservableCollection<WeatherData> WeatherDataList { get; set; } = new ObservableCollection<WeatherData>();
     
@@ -186,8 +217,109 @@ public class MainViewModel : ViewModelBase
         GetWeatherData(SelectedLocation);
     }
 
+    public async Task<WeatherData[]> FetchWeatherData(Location location)
+    {
+        WeatherData[] historicData;
+        DateTime from = DateFrom.DateTime;
+        DateTime to = DateTo.DateTime;
+
+        try
+        {
+            historicData = await Open_Meteo.fetchHistoricDataHourly(location, from, to);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return null;
+        }
+
+        return historicData;
+    }
+    public ISeries CalculateTemperatureSeries(WeatherData[] historicData, SKColor color)
+    {
+        var temperatures = historicData.Select(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture)).ToArray();
+        var times = historicData.Select(wd => wd.Time).ToArray();
+
+        var timepoints = new ObservableCollection<DateTimePoint>();
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepoints.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures[i],
+            });
+        }
+
+        var series = new LineSeries<DateTimePoint>
+        {
+            Values = timepoints,
+            Stroke = new SolidColorPaint(color),
+            Fill = null,
+            GeometrySize = 0,
+            GeometryStroke = new SolidColorPaint(color),
+            GeometryFill = new SolidColorPaint(color),
+            Name = SelectedLocation.ShortName
+        };
+
+        return series;
+    }
+    public ISeries CalculateAverageTemperatureColumns(WeatherData[] historicData, SKColor color)
+    {
+        var dailyAverages = historicData
+            .GroupBy(wd => new DateTime(DateTime.Parse(wd.Time).Year, DateTime.Parse(wd.Time).Month, DateTime.Parse(wd.Time).Day))
+            .Select(g => new
+            {
+                Day = g.Key,
+                AverageTemperature = g.Average(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture))
+            });
+
+        var timepointsAverages = new ObservableCollection<DateTimePoint>();
+
+        foreach (var average in dailyAverages)
+        {
+            timepointsAverages.Add(new DateTimePoint
+            {
+                DateTime = average.Day,
+                Value = average.AverageTemperature
+            });
+        }
+
+        var columnSeries = new ColumnSeries<DateTimePoint>
+        {
+            Name = SelectedLocation.ShortName,
+            Values = timepointsAverages,
+            Stroke = new SolidColorPaint(color),
+            Fill = new SolidColorPaint(color),
+            MaxBarWidth = 10,
+        };
+
+        return columnSeries;
+    }
     
     public async void GetWeatherData(Location location)
+    {
+        var historicData = await FetchWeatherData(location);
+        if (historicData == null)
+        {
+            return;
+        }
+
+        var color = GenerateRandomColor();
+        var temperatureSeries = CalculateTemperatureSeries(historicData, color);
+        var averageTemperatureColumns = CalculateAverageTemperatureColumns(historicData, color);
+
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var linesList = TemperatureLines.ToList();
+            linesList.Add(temperatureSeries);
+            TemperatureLines = linesList.ToArray();
+
+            var averagesList = AverageTemperatures.ToList();
+            averagesList.Add(averageTemperatureColumns);
+            AverageTemperatures = averagesList.ToArray();
+        });
+    }
+    public async void GetWeatherDataOld(Location location)
     {
         XAxes.First().Name = "Datum";
         WeatherDataList.Clear();
