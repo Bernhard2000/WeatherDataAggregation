@@ -17,7 +17,7 @@
             <ScrollViewer>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="350"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
@@ -45,7 +45,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Width="250" Text="{Binding ShortName}" />
+                                <TextBlock Width="290" Text="{Binding ShortName}" />
                                 <Button Tag="{Binding ShortName}"  Content="X" Click="Button_OnClick"/>
                             </StackPanel>
                         </DataTemplate>
