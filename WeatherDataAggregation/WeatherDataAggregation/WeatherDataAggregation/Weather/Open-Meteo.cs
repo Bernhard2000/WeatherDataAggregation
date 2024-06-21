@@ -49,10 +49,6 @@ public static class Open_Meteo
                 {
                     for (int i = 0; i < time.Count; i++)
                     {
-                        if (i == time.Count - 100)
-                        {
-                            Console.WriteLine(("test"));
-                        }
 
                         WeatherData weatherData = new WeatherData();
 
