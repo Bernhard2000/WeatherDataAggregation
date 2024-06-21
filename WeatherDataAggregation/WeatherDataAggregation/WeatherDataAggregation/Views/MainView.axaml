@@ -14,7 +14,7 @@
   </Design.DataContext>
     <TabControl>
         <TabItem Header="Historic Data">
-    <ScrollViewer>
+            <ScrollViewer>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"></ColumnDefinition>
@@ -66,9 +66,19 @@
             </DataGrid>-->
                   </StackPanel>
             <StackPanel Grid.Column="1">
-                <avalonia:CartesianChart x:Name="TemperatureLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
-                <avalonia:CartesianChart x:Name="AverageTemp" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
-
+                <TabControl>
+                    <TabItem Header="Hourly">
+                        <StackPanel>
+                        <!-- Add your controls for hourly data here -->
+                        <avalonia:CartesianChart x:Name="TemperatureLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
+                        <avalonia:CartesianChart x:Name="AverageTemp" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                        </StackPanel>
+                    </TabItem>
+                    <TabItem Header="Daily">
+                        <!-- Add your controls for daily data here -->
+                    </TabItem>
+                </TabControl>
+               
             </StackPanel>
         </Grid>
     </ScrollViewer>

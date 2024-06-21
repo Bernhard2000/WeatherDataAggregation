@@ -91,7 +91,7 @@ public class MainViewModel : ViewModelBase
     public bool SelectedOpenWeatherMap { get; set; }
     public Axis[] XAxes { get; set; } =
     {
-        new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy"))
+        new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy hh:mm"))
     };
     
     
