@@ -9,6 +9,7 @@ namespace WeatherDataAggregation;
 
 public static class GeoCoding
 {
+    //I know it's horrible practice to include API keys in code, but I really don't  care about a key to a free API, generated with a throwaway email alias
     private static string api_key = "6668698e8d611408745444ybxf017a3";
     private static Uri base_url = new Uri("https://geocode.maps.co/");
         
