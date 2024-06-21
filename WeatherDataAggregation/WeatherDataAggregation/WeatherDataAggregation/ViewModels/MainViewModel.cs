@@ -181,8 +181,6 @@ public class MainViewModel : ViewModelBase
            var minTemperatureColumnsTask = Task.Run(() => CalculateMinTemperatureColumns(historicDataDaily, color, location));
            var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
            var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
-            var temperatureForecastTask = Task.Run(() => CalculateTemperatureHourlySeries(forecastData, color, location));
-           //await Task.WhenAll(temperatureSeriesTask, averageTemperatureColumnsTask, minTemperatureColumnsTask, maxTemperatureColumnsTask, averageTemperatureMonthlyColumnsTask);
 
                 
             tempTemperatureLines.Add(await temperatureSeriesTask);
@@ -397,7 +395,6 @@ public class MainViewModel : ViewModelBase
             Values = timepointsAverages,
             Stroke = new SolidColorPaint(color),
             Fill = new SolidColorPaint(color),
-            MaxBarWidth = 20,
         };
 
         return columnSeries;
