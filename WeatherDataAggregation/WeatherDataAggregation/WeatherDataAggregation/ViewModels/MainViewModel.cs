@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -151,17 +152,17 @@ public class MainViewModel : ViewModelBase
             .Subscribe(_ => OnDateChanged());
     }
     
-    private void OnDateChanged()
+    private async Task OnDateChanged()
     {
         TemperatureLines = new ISeries[] { };
         AverageTemperatures = new ISeries[] { };
 
-        var tempTemperatureLines = new List<ISeries>();
-        var tempAverageTemperatures = new List<ISeries>();
+        var tempTemperatureLines = new ConcurrentBag<ISeries>();
+        var tempAverageTemperatures = new ConcurrentBag<ISeries>();
 
-        var loopResult = Parallel.ForEach(Locations, location =>
+        await Parallel.ForEachAsync(Locations, async (location, cancellationToken) =>
         {
-            var historicData = FetchWeatherData(location).Result;
+            var historicData = await FetchWeatherData(location);
             if (historicData == null)
             {
                 return;
@@ -171,22 +172,12 @@ public class MainViewModel : ViewModelBase
             var temperatureSeries = CalculateTemperatureSeries(historicData, color);
             var averageTemperatureColumns = CalculateAverageTemperatureColumns(historicData, color);
 
-            lock (tempTemperatureLines)
-            {
-                tempTemperatureLines.Add(temperatureSeries);
-            }
-
-            lock (tempAverageTemperatures)
-            {
-                tempAverageTemperatures.Add(averageTemperatureColumns);
-            }
+            tempTemperatureLines.Add(temperatureSeries);
+            tempAverageTemperatures.Add(averageTemperatureColumns);
         });
 
-        if (loopResult.IsCompleted)
-        {
-            TemperatureLines = tempTemperatureLines.ToArray();
-            AverageTemperatures = tempAverageTemperatures.ToArray();
-        }
+        TemperatureLines = tempTemperatureLines.ToArray();
+        AverageTemperatures = tempAverageTemperatures.ToArray();
     }
     public ObservableCollection<WeatherData> WeatherDataList { get; set; } = new ObservableCollection<WeatherData>();
     
