@@ -216,7 +216,11 @@ public class MainViewModel : ViewModelBase
             {
                 LocationSearchResults.Add(location);
             }
-            SelectedLocation = LocationSearchResults[0];
+            
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                SelectedLocation = LocationSearchResults[0];
+            });        
         });
         LocationSearchQuery = "";
     }
