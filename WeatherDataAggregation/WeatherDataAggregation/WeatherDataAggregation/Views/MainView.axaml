@@ -70,11 +70,19 @@
                     <TabItem Header="Hourly">
                         <StackPanel>
                         <!-- Add your controls for hourly data here -->
-                        <avalonia:CartesianChart x:Name="TemperatureLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
-                        <avalonia:CartesianChart x:Name="AverageTemp" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                        <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Daily">
+                        <StackPanel>
+                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                        </StackPanel>
+                        <!-- Add your controls for daily data here -->
+                    </TabItem>
+                    <TabItem Header="Monthly">
+                        <StackPanel>
+                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempMonthly" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperaturesMonthly}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                        </StackPanel>
                         <!-- Add your controls for daily data here -->
                     </TabItem>
                 </TabControl>

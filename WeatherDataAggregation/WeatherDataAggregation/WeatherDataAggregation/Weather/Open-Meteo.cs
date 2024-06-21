@@ -76,4 +76,38 @@ public static class Open_Meteo
 
                 return weatherDataArr;
     }
+    
+    public static async Task<WeatherData[]> fetchHistoricDataDaily(Location location, DateTime startDate, DateTime endDate)
+    {
+        if (DateTime.Now - endDate < TimeSpan.FromDays(5))
+        {
+            throw new ArgumentException("End date must be at least 5 days in the past");
+        }
+
+        using HttpClient client = new HttpClient();
+        var uri = new Uri(base_url,
+            $"archive?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}&daily=temperature_2m_mean&timezone=auto");
+        HttpResponseMessage response = await client.GetAsync(uri);
+        response.EnsureSuccessStatusCode();
+        string responseBody = await response.Content.ReadAsStringAsync();
+        JsonNode json = JsonNode.Parse(responseBody);
+        var time = json["daily"]["time"].AsArray();
+        WeatherData[] weatherDataArr = new WeatherData[time.Count];
+        if (time != null)
+        {
+            for (int i = 0; i < time.Count; i++)
+            {
+                WeatherData weatherData = new WeatherData();
+
+                if (json["daily"]["temperature_2m_mean"][i] != null)
+                    weatherData.Temperature = json["daily"]["temperature_2m_mean"][i].ToString();
+
+                weatherData.Time = time[i].ToString();
+
+                weatherDataArr[i] = weatherData;
+            }
+        }
+
+        return weatherDataArr;
+    }
 }

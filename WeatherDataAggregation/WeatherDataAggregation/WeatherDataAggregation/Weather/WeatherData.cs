@@ -28,6 +28,8 @@ public class WeatherData
     public string FeelsLike { get; set; }
     public string WindGust { get; set; }
     
+    public Location Location { get; set; }
+    
     
     public WeatherData()
     {
