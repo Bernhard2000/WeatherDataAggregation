@@ -125,6 +125,8 @@
                   </StackPanel>
             <StackPanel Grid.Column="1">
                 <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureForecastLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
+                <avalonia:CartesianChart Title="{Binding TitlePrecipitation}" x:Name="PrecipitationForecastLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding PrecipitationForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
+
             </StackPanel>
             </Grid>
         </TabItem>

@@ -119,13 +119,14 @@ public static class Open_Meteo
     public static async Task<WeatherData[]> FetchForecastData(Location location)
     {
         using HttpClient client = new HttpClient();
-        var uri = new Uri($"https://api.open-meteo.com/v1/forecast?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&past_days=5");
+        var uri = new Uri($"https://api.open-meteo.com/v1/forecast?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m,precipitation&daily=temperature_2m_max,temperature_2m_min&timezone=auto&past_days=5");
         HttpResponseMessage response = await client.GetAsync(uri);
         response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
         JsonNode json = JsonNode.Parse(responseBody);
 
         var hourlyData = json["hourly"]["temperature_2m"].AsArray();
+        var hourlyPrecipitation = json["hourly"]["precipitation"].AsArray();
         var dailyDataMax = json["daily"]["temperature_2m_max"].AsArray();
         var dailyDataMin = json["daily"]["temperature_2m_min"].AsArray();
         var time = json["hourly"]["time"].AsArray();
@@ -137,6 +138,7 @@ public static class Open_Meteo
             WeatherData weatherData = new WeatherData();
 
             weatherData.Temperature = hourlyData[i].ToString();
+            weatherData.Precipitation = hourlyPrecipitation[i].ToString();
             weatherData.Time = time[i].ToString();
             weatherDataArr[i] = weatherData;
         }

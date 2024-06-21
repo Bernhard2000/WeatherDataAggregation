@@ -78,6 +78,13 @@ public class MainViewModel : ViewModelBase
         set  => this.RaiseAndSetIfChanged(ref _temperatureForecastLines, value);
     }
     
+    private ISeries[] _precipitationForecastLines = new ISeries[] { };
+    public ISeries[] PrecipitationForecastLines
+    {
+        get => _precipitationForecastLines;
+        set  => this.RaiseAndSetIfChanged(ref _precipitationForecastLines, value);
+    }
+    
     private ISeries[] _averageTemperatures = new ISeries[] { };
     public ISeries[] AverageTemperatures
     {
@@ -164,13 +171,11 @@ public class MainViewModel : ViewModelBase
         {
             var fetchHourlyTask = FetchWeatherDataHourly(location);
             var fetchDailyTask = FetchWeatherDataDaily(location);
-            var fetchForecastTask = Open_Meteo.FetchForecastData(location);
 
             //await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
             
             var historicDataHourly = await fetchHourlyTask;
             var historicDataDaily = await fetchDailyTask;
-            var forecastData = await fetchForecastTask;
 
 
             
@@ -264,6 +269,35 @@ public class MainViewModel : ViewModelBase
     public ISeries CalculateTemperatureHourlySeries(WeatherData[] historicData, SKColor color, Location location)
     {
         var temperatures = historicData.Select(wd => double.Parse(wd.Temperature, CultureInfo.InvariantCulture)).ToArray();
+        var times = historicData.Select(wd => wd.Time).ToArray();
+
+        var timepoints = new ObservableCollection<DateTimePoint>();
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepoints.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures[i],
+            });
+        }
+
+        var series = new LineSeries<DateTimePoint>
+        {
+            Values = timepoints,
+            Stroke = new SolidColorPaint(color),
+            Fill = null,
+            GeometrySize = 0,
+            GeometryStroke = new SolidColorPaint(color),
+            GeometryFill = new SolidColorPaint(color),
+            Name= location.ShortName
+        };
+
+        return series;
+    }
+    
+    public ISeries CalculatePrecipitationHourlySeries(WeatherData[] historicData, SKColor color, Location location)
+    {
+        var temperatures = historicData.Select(wd => double.Parse(wd.Precipitation, CultureInfo.InvariantCulture)).ToArray();
         var times = historicData.Select(wd => wd.Time).ToArray();
 
         var timepoints = new ObservableCollection<DateTimePoint>();
@@ -469,6 +503,15 @@ public class MainViewModel : ViewModelBase
             Padding = new LiveChartsCore.Drawing.Padding(15),
             Paint = new SolidColorPaint(SKColors.DarkSlateGray)
         };
+    
+    public LabelVisual TitlePrecipitation { get; set; } =
+        new LabelVisual
+        {
+            Text = "Precipitation",
+            TextSize = 25,
+            Padding = new LiveChartsCore.Drawing.Padding(15),
+            Paint = new SolidColorPaint(SKColors.DarkBlue)
+        };
 
     public async void GetWeatherData(Location location)
     {
@@ -489,6 +532,7 @@ public class MainViewModel : ViewModelBase
         var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
         var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
         var temperatureForecastTask = Task.Run(() => CalculateTemperatureHourlySeries(forecastData, color, location));
+        var precipitationForecastTask = Task.Run(() => CalculatePrecipitationHourlySeries(forecastData, color, location));
         //await Task.WhenAll(temperatureSeriesTask, averageTemperatureColumnsTask, minTemperatureColumnsTask, maxTemperatureColumnsTask, averageTemperatureMonthlyColumnsTask);
 
                 
@@ -498,6 +542,7 @@ public class MainViewModel : ViewModelBase
         var maximumTemperatureColumns = await maxTemperatureColumnsTask;
         var averageTemperatureMonthColumns = await  averageTemperatureMonthlyColumnsTask;
         var temperatureForecastSeries = await temperatureForecastTask;
+        var precipitationForecastSeries = await precipitationForecastTask;
 
         Dispatcher.UIThread.InvokeAsync(() =>
         {
@@ -524,6 +569,10 @@ public class MainViewModel : ViewModelBase
             var forecastList = TemperatureForecastLines.ToList();
             forecastList.Add(temperatureForecastSeries);
             TemperatureForecastLines = forecastList.ToArray();
+            
+            var precipitationList = PrecipitationForecastLines.ToList();
+            precipitationList.Add(precipitationForecastSeries);
+            PrecipitationForecastLines = precipitationList.ToArray();
         });
     }
     
