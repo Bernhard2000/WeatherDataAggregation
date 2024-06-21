@@ -76,6 +76,9 @@
                     <TabItem Header="Daily">
                         <StackPanel>
                             <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleMaximumTemperature}" x:Name="MaximumTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding MaximumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleMinimumTemperature}" x:Name="MinimumTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding MinimumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+
                         </StackPanel>
                         <!-- Add your controls for daily data here -->
                     </TabItem>

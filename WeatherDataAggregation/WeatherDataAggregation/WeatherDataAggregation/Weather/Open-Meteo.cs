@@ -86,7 +86,7 @@ public static class Open_Meteo
 
         using HttpClient client = new HttpClient();
         var uri = new Uri(base_url,
-            $"archive?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}&daily=temperature_2m_mean&timezone=auto");
+            $"archive?latitude={location.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={location.Longitude.ToString(CultureInfo.InvariantCulture)}&start_date={startDate:yyyy-MM-dd}&end_date={endDate:yyyy-MM-dd}&daily=temperature_2m_mean,temperature_2m_max,temperature_2m_min&timezone=auto");
         HttpResponseMessage response = await client.GetAsync(uri);
         response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
@@ -102,6 +102,11 @@ public static class Open_Meteo
                 if (json["daily"]["temperature_2m_mean"][i] != null)
                     weatherData.Temperature = json["daily"]["temperature_2m_mean"][i].ToString();
 
+                if (json["daily"]["temperature_2m_max"][i] != null)
+                    weatherData.MaximumTemperature = json["daily"]["temperature_2m_max"][i].ToString();
+                
+                if (json["daily"]["temperature_2m_min"][i] != null)
+                    weatherData.MinimumTemperature = json["daily"]["temperature_2m_min"][i].ToString();
                 weatherData.Time = time[i].ToString();
 
                 weatherDataArr[i] = weatherData;

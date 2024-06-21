@@ -78,6 +78,20 @@ public class MainViewModel : ViewModelBase
         get => _averageTemperatures;
         set => this.RaiseAndSetIfChanged(ref _averageTemperatures, value);
     }
+    
+    private ISeries[] _maximumTemperatures = new ISeries[] { };
+    public ISeries[] MaximumTemperatures
+    {
+        get => _maximumTemperatures;
+        set => this.RaiseAndSetIfChanged(ref _maximumTemperatures, value);
+    }
+    
+    private ISeries[] _minimumTemperatures = new ISeries[] { };
+    public ISeries[] MinimumTemperatures
+    {
+        get => _minimumTemperatures;
+        set => this.RaiseAndSetIfChanged(ref _minimumTemperatures, value);
+    }
 
     private ISeries[] _averageTemperaturesMonthly = new ISeries[] { };
     public ISeries[] AverageTemperaturesMonthly
@@ -130,9 +144,13 @@ public class MainViewModel : ViewModelBase
     {
         TemperatureLines = new ISeries[] { };
         AverageTemperatures = new ISeries[] { };
+        MaximumTemperatures = new ISeries[] { };
 
         var tempTemperatureLines = new ConcurrentBag<ISeries>();
         var tempAverageTemperatures = new ConcurrentBag<ISeries>();
+        var tempMaxTemperatures = new ConcurrentBag<ISeries>();
+        var tempMinTemperatures = new ConcurrentBag<ISeries>();
+
         var tempAverageTemperaturesMonthly = new ConcurrentBag<ISeries>();
 
 
@@ -154,15 +172,22 @@ public class MainViewModel : ViewModelBase
             var color = GenerateRandomColor();
             var temperatureSeries = CalculateTemperatureHourlySeries(historicDataHourly, color, location);
             var averageTemperatureColumns = CalculateMeanTemperatureColumns(historicDataDaily, color, location);
+            var minTemperatureColumns = CalculateMinTemperatureColumns(historicDataDaily, color, location);
+            var maxTemperatureColumns = CalculateMaxTemperatureColumns(historicDataDaily, color, location);
+
             var averageTemperatureMonthlyColumns = CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location); 
                 
             tempTemperatureLines.Add(temperatureSeries);
             tempAverageTemperatures.Add(averageTemperatureColumns);
+            tempMaxTemperatures.Add(maxTemperatureColumns);
+            tempMinTemperatures.Add(minTemperatureColumns);
             tempAverageTemperaturesMonthly.Add(averageTemperatureMonthlyColumns);
         });
 
         TemperatureLines = tempTemperatureLines.ToArray();
         AverageTemperatures = tempAverageTemperatures.ToArray();
+        MaximumTemperatures = tempMaxTemperatures.ToArray();
+        MinimumTemperatures = tempMinTemperatures.ToArray();
         AverageTemperaturesMonthly = tempAverageTemperaturesMonthly.ToArray();
     }
     
@@ -285,6 +310,58 @@ public class MainViewModel : ViewModelBase
         return columnSeries;
     }
     
+    public ISeries CalculateMaxTemperatureColumns(WeatherData[] historicData, SKColor color, Location location)
+    {
+        var temperatures = historicData.Select(wd => double.Parse(wd.MaximumTemperature, CultureInfo.InvariantCulture)).ToArray();
+        var times = historicData.Select(wd => wd.Time).ToArray();
+
+        var timepoints = new ObservableCollection<DateTimePoint>();
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepoints.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures[i],
+            });
+        }
+
+        var columnSeries = new ColumnSeries<DateTimePoint>
+        {
+            Name = location.ShortName,
+            Values = timepoints,
+            Stroke = new SolidColorPaint(color),
+            Fill = new SolidColorPaint(color),
+            MaxBarWidth = 10,
+        };
+        return columnSeries;
+    }
+    
+    public ISeries CalculateMinTemperatureColumns(WeatherData[] historicData, SKColor color, Location location)
+    {
+        var temperatures = historicData.Select(wd => double.Parse(wd.MinimumTemperature, CultureInfo.InvariantCulture)).ToArray();
+        var times = historicData.Select(wd => wd.Time).ToArray();
+
+        var timepoints = new ObservableCollection<DateTimePoint>();
+        for (int i = 0; i < times.Length; i++)
+        {
+            timepoints.Add(new DateTimePoint
+            {
+                DateTime = DateTime.Parse(times[i]),
+                Value = temperatures[i],
+            });
+        }
+
+        var columnSeries = new ColumnSeries<DateTimePoint>
+        {
+            Name = location.ShortName,
+            Values = timepoints,
+            Stroke = new SolidColorPaint(color),
+            Fill = new SolidColorPaint(color),
+            MaxBarWidth = 10,
+        };
+        return columnSeries;
+    }
+    
     public ISeries CalculateAverageTemperatureByMonthColumns(WeatherData[] historicData, SKColor color, Location location)
     {
         var monthlyAverages = historicData
@@ -359,6 +436,26 @@ public class MainViewModel : ViewModelBase
             Paint = new SolidColorPaint(SKColors.DarkSlateGray)
         };
     
+    public LabelVisual TitleMinimumTemperature { get; set; } =
+        new LabelVisual
+        {
+            Text = "Minimum Temperature",
+            TextSize = 25,
+            Padding = new LiveChartsCore.Drawing.Padding(15),
+            Paint = new SolidColorPaint(SKColors.DarkSlateGray)
+        };
+    
+    public LabelVisual TitleMaximumTemperature { get; set; } =
+        new LabelVisual
+        {
+            Text = "Maximum Temperature",
+            TextSize = 25,
+            Padding = new LiveChartsCore.Drawing.Padding(15),
+            Paint = new SolidColorPaint(SKColors.DarkSlateGray)
+        };
+
+
+    
     public LabelVisual TitleTemperature { get; set; } =
         new LabelVisual
         {
@@ -404,30 +501,6 @@ public class MainViewModel : ViewModelBase
             AverageTemperaturesMonthly = monthlyAverageTempList.ToArray();
         });
     }
-    
-    /*public async void GetWeatherDataOld(Location location)
-    {
-        var historicData = await FetchWeatherDataHourly(location);
-        if (historicData == null)
-        {
-            return;
-        }
-
-        var color = GenerateRandomColor();
-        var temperatureSeries = CalculateTemperatureHourlySeries(historicData, color, location);
-        var averageTemperatureColumns = CalculateAverageTemperatureColumns(historicData, color, location);
-        var averageTemperatureByMonthColumns = CalculateAverageTemperatureByMonthColumns(historicData, color, location);
-        Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            var linesList = TemperatureLines.ToList();
-            linesList.Add(temperatureSeries);
-            TemperatureLines = linesList.ToArray();
-
-            var averagesList = AverageTemperatures.ToList();
-            averagesList.Add(averageTemperatureColumns);
-            AverageTemperatures = averagesList.ToArray();
-        });
-    }*/
     
     public static SKColor GenerateRandomColor()
     {
