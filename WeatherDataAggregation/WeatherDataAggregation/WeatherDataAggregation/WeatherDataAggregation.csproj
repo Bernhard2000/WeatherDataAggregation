@@ -23,4 +23,8 @@
     <ItemGroup>
       <Folder Include="Converters\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Weather\OpenWeatherMap.cs" />
+    </ItemGroup>
 </Project>
