@@ -69,7 +69,13 @@ public class MainViewModel : ViewModelBase
     {
         get => _temperatureLines;
         set  => this.RaiseAndSetIfChanged(ref _temperatureLines, value);
-        
+    }
+    
+    private ISeries[] _temperatureForecastLines = new ISeries[] { };
+    public ISeries[] TemperatureForecastLines
+    {
+        get => _temperatureForecastLines;
+        set  => this.RaiseAndSetIfChanged(ref _temperatureForecastLines, value);
     }
     
     private ISeries[] _averageTemperatures = new ISeries[] { };
@@ -113,6 +119,11 @@ public class MainViewModel : ViewModelBase
         new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy hh:mm"))
     };
     
+    public Axis[] XAxesForecast { get; set; } =
+    {
+        new DateTimeAxis(TimeSpan.FromDays(1), date => date.ToString("dd.MM.yyyy hh:mm"))
+    };
+    
     
     public Axis[] XAxesAverages { get; set; } =
     {
@@ -120,12 +131,6 @@ public class MainViewModel : ViewModelBase
     };
 
     public ReactiveCommand<Unit, Unit> CompareYearsCommand { get; }
-
-    private async Task CompareYearsAsync()
-    {
-        // Update the TemperatureLines and AverageTemperatures properties based on the selected year
-        // This is just a placeholder. You need to implement the actual logic.
-    }
     
     public ObservableCollection<Location> LocationSearchResults { get; set; } = new ObservableCollection<Location>();
 
@@ -134,7 +139,6 @@ public class MainViewModel : ViewModelBase
     {
         RefreshCommand = ReactiveCommand.Create(AddLocation);
         SearchLocationCommand = ReactiveCommand.Create(SearchLocation);
-        CompareYearsCommand = ReactiveCommand.CreateFromTask(CompareYearsAsync);
         
         this.WhenAnyValue(x => x.DateFrom, x => x.DateTo)
             .Subscribe(_ => OnDateChanged());
@@ -145,6 +149,8 @@ public class MainViewModel : ViewModelBase
         TemperatureLines = new ISeries[] { };
         AverageTemperatures = new ISeries[] { };
         MaximumTemperatures = new ISeries[] { };
+        MinimumTemperatures = new ISeries[] { };
+
 
         var tempTemperatureLines = new ConcurrentBag<ISeries>();
         var tempAverageTemperatures = new ConcurrentBag<ISeries>();
@@ -158,30 +164,32 @@ public class MainViewModel : ViewModelBase
         {
             var fetchHourlyTask = FetchWeatherDataHourly(location);
             var fetchDailyTask = FetchWeatherDataDaily(location);
+            var fetchForecastTask = Open_Meteo.FetchForecastData(location);
 
-            await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
-
+            //await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
+            
             var historicDataHourly = await fetchHourlyTask;
             var historicDataDaily = await fetchDailyTask;
+            var forecastData = await fetchForecastTask;
 
-            if (historicDataHourly == null || historicDataDaily == null)
-            {
-                return;
-            }
 
+            
             var color = GenerateRandomColor();
-            var temperatureSeries = CalculateTemperatureHourlySeries(historicDataHourly, color, location);
-            var averageTemperatureColumns = CalculateMeanTemperatureColumns(historicDataDaily, color, location);
-            var minTemperatureColumns = CalculateMinTemperatureColumns(historicDataDaily, color, location);
-            var maxTemperatureColumns = CalculateMaxTemperatureColumns(historicDataDaily, color, location);
+           
+           var temperatureSeriesTask = Task.Run(() => CalculateTemperatureHourlySeries(historicDataHourly, color, location));
+           var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
+           var minTemperatureColumnsTask = Task.Run(() => CalculateMinTemperatureColumns(historicDataDaily, color, location));
+           var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
+           var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
+            var temperatureForecastTask = Task.Run(() => CalculateTemperatureHourlySeries(forecastData, color, location));
+           //await Task.WhenAll(temperatureSeriesTask, averageTemperatureColumnsTask, minTemperatureColumnsTask, maxTemperatureColumnsTask, averageTemperatureMonthlyColumnsTask);
 
-            var averageTemperatureMonthlyColumns = CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location); 
                 
-            tempTemperatureLines.Add(temperatureSeries);
-            tempAverageTemperatures.Add(averageTemperatureColumns);
-            tempMaxTemperatures.Add(maxTemperatureColumns);
-            tempMinTemperatures.Add(minTemperatureColumns);
-            tempAverageTemperaturesMonthly.Add(averageTemperatureMonthlyColumns);
+            tempTemperatureLines.Add(await temperatureSeriesTask);
+            tempAverageTemperatures.Add(await averageTemperatureColumnsTask);
+            tempMaxTemperatures.Add(await maxTemperatureColumnsTask);
+            tempMinTemperatures.Add(await minTemperatureColumnsTask);
+            tempAverageTemperaturesMonthly.Add(await  averageTemperatureMonthlyColumnsTask);
         });
 
         TemperatureLines = tempTemperatureLines.ToArray();
@@ -389,7 +397,7 @@ public class MainViewModel : ViewModelBase
             Values = timepointsAverages,
             Stroke = new SolidColorPaint(color),
             Fill = new SolidColorPaint(color),
-            MaxBarWidth = 10,
+            MaxBarWidth = 20,
         };
 
         return columnSeries;
@@ -469,22 +477,30 @@ public class MainViewModel : ViewModelBase
     {
         var fetchHourlyTask = FetchWeatherDataHourly(location);
         var fetchDailyTask = FetchWeatherDataDaily(location);
+        var fetchForecastTask = Open_Meteo.FetchForecastData(location);
 
-        await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
+        //await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
 
         var historicDataHourly = await fetchHourlyTask;
         var historicDataDaily = await fetchDailyTask;
-
-        if (historicDataHourly == null || historicDataDaily == null)
-        {
-            return;
-        }
+        var forecastData = await fetchForecastTask;
 
         var color = GenerateRandomColor();
-        var temperatureSeries = CalculateTemperatureHourlySeries(historicDataHourly, color, location);
-        var averageTemperatureColumns = CalculateMeanTemperatureColumns(historicDataDaily, color, location);
-        var averageTemperatureMonthColumns = CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location);
+        var temperatureSeriesTask = Task.Run(() => CalculateTemperatureHourlySeries(historicDataHourly, color, location));
+        var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
+        var minTemperatureColumnsTask = Task.Run(() => CalculateMinTemperatureColumns(historicDataDaily, color, location));
+        var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
+        var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
+        var temperatureForecastTask = Task.Run(() => CalculateTemperatureHourlySeries(forecastData, color, location));
+        //await Task.WhenAll(temperatureSeriesTask, averageTemperatureColumnsTask, minTemperatureColumnsTask, maxTemperatureColumnsTask, averageTemperatureMonthlyColumnsTask);
 
+                
+        var temperatureSeries = await temperatureSeriesTask;
+        var averageTemperatureColumns = await averageTemperatureColumnsTask;
+        var minimumTemperatureColumns = await minTemperatureColumnsTask;
+        var maximumTemperatureColumns = await maxTemperatureColumnsTask;
+        var averageTemperatureMonthColumns = await  averageTemperatureMonthlyColumnsTask;
+        var temperatureForecastSeries = await temperatureForecastTask;
 
         Dispatcher.UIThread.InvokeAsync(() =>
         {
@@ -495,10 +511,22 @@ public class MainViewModel : ViewModelBase
             var averagesList = AverageTemperatures.ToList();
             averagesList.Add(averageTemperatureColumns);
             AverageTemperatures = averagesList.ToArray();
+            
+            var maxList = MaximumTemperatures.ToList();
+            maxList.Add(maximumTemperatureColumns);
+            MaximumTemperatures = maxList.ToArray();
+            
+            var minList = MinimumTemperatures.ToList();
+            minList.Add(minimumTemperatureColumns);
+            MinimumTemperatures = minList.ToArray();
 
             var monthlyAverageTempList = AverageTemperaturesMonthly.ToList();
             monthlyAverageTempList.Add(averageTemperatureMonthColumns);
             AverageTemperaturesMonthly = monthlyAverageTempList.ToArray();
+            
+            var forecastList = TemperatureForecastLines.ToList();
+            forecastList.Add(temperatureForecastSeries);
+            TemperatureForecastLines = forecastList.ToArray();
         });
     }
     

@@ -94,7 +94,40 @@
         </Grid>
     </ScrollViewer>
         </TabItem>
-        <TabItem Header="Forecast"></TabItem>
+        <TabItem Header="Forecast">
+             <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0">
+                <StackPanel Margin= "0 0 0 10" HorizontalAlignment="Left" Orientation="Vertical">
+                    <StackPanel HorizontalAlignment="Left"  Orientation="Horizontal">
+                        <TextBox  Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+                        <Button Margin="5 0 0 0" Command="{Binding SearchLocationCommand}">Search</Button>
+                    </StackPanel>
+                    <ComboBox Margin="0 5 0 0" HorizontalAlignment="Left" Name="LocationDropdownForecast" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
+                </StackPanel>
+                <Button Content="Add to Collection" Command="{Binding RefreshCommand}" />
+        
+                <ListBox Margin="0 5 0 0" ItemsSource="{Binding Locations}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ShortName}" />
+                                <Button Tag="{Binding ShortName}"  Content="X" Click="Button_OnClick"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                
+                  </StackPanel>
+            <StackPanel Grid.Column="1">
+                <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureForecastLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
+            </StackPanel>
+            </Grid>
+        </TabItem>
 
     </TabControl>
 
