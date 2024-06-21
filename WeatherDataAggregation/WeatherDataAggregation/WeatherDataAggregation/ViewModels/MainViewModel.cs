@@ -522,22 +522,20 @@ public class MainViewModel : ViewModelBase
         var fetchHourlyTask = FetchWeatherDataHourly(location);
         var fetchDailyTask = FetchWeatherDataDaily(location);
         var fetchForecastTask = Open_Meteo.FetchForecastData(location);
+        var color = GenerateRandomColor();
 
-        //await Task.WhenAll(fetchHourlyTask, fetchDailyTask);
-
+        var temperatureSeriesTask = fetchHourlyTask.ContinueWith((Task<WeatherData[]> t) => CalculateTemperatureHourlySeries(t.Result, color, location));
+        var averageTemperatureColumnsTask = fetchDailyTask.ContinueWith((Task<WeatherData[]> t) => CalculateMeanTemperatureColumns(t.Result, color, location));
         var historicDataHourly = await fetchHourlyTask;
         var historicDataDaily = await fetchDailyTask;
         var forecastData = await fetchForecastTask;
 
-        var color = GenerateRandomColor();
-        var temperatureSeriesTask = Task.Run(() => CalculateTemperatureHourlySeries(historicDataHourly, color, location));
-        var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
+        //var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
         var minTemperatureColumnsTask = Task.Run(() => CalculateMinTemperatureColumns(historicDataDaily, color, location));
         var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
         var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
         var temperatureForecastTask = Task.Run(() => CalculateTemperatureHourlySeries(forecastData, color, location));
         var precipitationForecastTask = Task.Run(() => CalculatePrecipitationHourlySeries(forecastData, color, location));
-        //await Task.WhenAll(temperatureSeriesTask, averageTemperatureColumnsTask, minTemperatureColumnsTask, maxTemperatureColumnsTask, averageTemperatureMonthlyColumnsTask);
 
                 
         var temperatureSeries = await temperatureSeriesTask;
