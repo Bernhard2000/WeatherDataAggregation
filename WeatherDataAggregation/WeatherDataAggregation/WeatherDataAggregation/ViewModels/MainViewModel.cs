@@ -429,7 +429,7 @@ public class MainViewModel : ViewModelBase
 
         var columnSeries = new ColumnSeries<DateTimePoint>
         {
-            Name = SelectedLocation.ShortName,
+            Name = location.ShortName,
             Values = timepointsAverages,
             Stroke = new SolidColorPaint(color),
             Fill = new SolidColorPaint(color),
@@ -525,12 +525,10 @@ public class MainViewModel : ViewModelBase
         var color = GenerateRandomColor();
 
         var temperatureSeriesTask = fetchHourlyTask.ContinueWith((Task<WeatherData[]> t) => CalculateTemperatureHourlySeries(t.Result, color, location));
-        var averageTemperatureColumnsTask = fetchDailyTask.ContinueWith((Task<WeatherData[]> t) => CalculateMeanTemperatureColumns(t.Result, color, location));
-        var historicDataHourly = await fetchHourlyTask;
         var historicDataDaily = await fetchDailyTask;
         var forecastData = await fetchForecastTask;
 
-        //var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
+        var averageTemperatureColumnsTask = Task.Run(() => CalculateMeanTemperatureColumns(historicDataDaily, color, location));
         var minTemperatureColumnsTask = Task.Run(() => CalculateMinTemperatureColumns(historicDataDaily, color, location));
         var maxTemperatureColumnsTask = Task.Run(() => CalculateMaxTemperatureColumns(historicDataDaily, color, location));
         var averageTemperatureMonthlyColumnsTask = Task.Run(() => CalculateAverageTemperatureByMonthColumns(historicDataDaily, color, location));
