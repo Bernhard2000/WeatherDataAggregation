@@ -52,7 +52,6 @@ public static class Open_Meteo
 
                         WeatherData weatherData = new WeatherData();
 
-                        //JsonNode? temperature2m, relativeHumidity2m, dewPoint2m, apparentTemperature, precipitationProbability, precipitation = null;
                         if (json["hourly"]["temperature_2m"][i] != null)
                             weatherData.Temperature = json["hourly"]["temperature_2m"][i].ToString();
                         /*if (json["hourly"]["relative_humidity_2m"] != null)

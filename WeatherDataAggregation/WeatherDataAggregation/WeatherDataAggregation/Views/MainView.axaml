@@ -45,7 +45,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ShortName}" />
+                                <TextBlock Width="250" Text="{Binding ShortName}" />
                                 <Button Tag="{Binding ShortName}"  Content="X" Click="Button_OnClick"/>
                             </StackPanel>
                         </DataTemplate>
@@ -115,7 +115,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ShortName}" />
+                                <TextBlock Width="250" Text="{Binding ShortName}" />
                                 <Button Tag="{Binding ShortName}"  Content="X" Click="Button_OnClick"/>
                             </StackPanel>
                         </DataTemplate>
