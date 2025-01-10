@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: D:\a\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation.Browser\bin\Release\net8.0-browser\browser-wasm
+          path: D:\a\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation.Browser\bin\Release\net8.0-browser\browser-wasm\AppBundle
 
   deploy:
     runs-on: windows-latest
