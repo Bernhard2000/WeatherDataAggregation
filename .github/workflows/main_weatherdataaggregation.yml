@@ -32,7 +32,7 @@ jobs:
 
       - name: dotnet publish
         working-directory: ./WeatherDataAggregation/WeatherDataAggregation
-        run: dotnet publish --configuration Release --output -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        run: dotnet publish --configuration Release --output ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
 
 
