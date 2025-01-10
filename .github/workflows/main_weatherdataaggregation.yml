@@ -23,7 +23,7 @@ jobs:
           include-prerelease: true
       
       - name: Change dir
-        run: cd WeatherDataAggregation/WeatherDataAggregation
+        run: cd WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
