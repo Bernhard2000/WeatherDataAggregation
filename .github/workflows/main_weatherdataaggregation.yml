@@ -21,6 +21,9 @@ jobs:
         with:
           dotnet-version: '8.x'
           include-prerelease: true
+      
+      - name: Change dir
+        run: cd WeatherDataAggregation/WeatherDataAggregation
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -32,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp/WeatherDataAggregation/WeatherDataAggregation
+          path: ${{env.DOTNET_ROOT}}/site
 
   deploy:
     runs-on: windows-latest
