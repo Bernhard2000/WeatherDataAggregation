@@ -28,11 +28,11 @@ jobs:
 
       - name: Build with dotnet
         working-directory: ./WeatherDataAggregation/WeatherDataAggregation
-        run: dotnet build --configuration Release WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        run: dotnet build --configuration Release WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation.Browser
-        run: dotnet publish --configuration Release --output ./publish WeatherDataAggregation/WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
+        run: dotnet publish --configuration Release --output ./publish WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       
 
