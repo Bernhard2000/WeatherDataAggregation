@@ -31,14 +31,26 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/App_Data
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation.Browser
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
+
+      - name: Restore workloads
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregatio.Browser
+        run: dotnet workload restore
+
+      - name: Build with dotnet
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation.Browser
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation.Browser
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/WeatherDataAggregation/App_Data
+          path: ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
 
   deploy:
     runs-on: windows-latest
