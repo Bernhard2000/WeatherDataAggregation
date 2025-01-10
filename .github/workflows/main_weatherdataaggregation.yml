@@ -31,7 +31,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation.Browser
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation.Browser
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
 
       - name: Restore workloads
