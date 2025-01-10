@@ -21,26 +21,26 @@ jobs:
         with:
           dotnet-version: '8.x'
           include-prerelease: true
-        
+
       - name: Restore workloads
         working-directory: ./WeatherDataAggregation/WeatherDataAggregation
         run: dotnet workload restore
 
       - name: Build with dotnet
-        working-directory: ./WeatherDataAggregation
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
         run: dotnet build --configuration Release WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation
-        run: dotnet publish --configuration Release --output ./publish WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
+        run: dotnet publish --configuration Release --output -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
-      
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: ./publish
+          path: -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
 
   deploy:
     runs-on: windows-latest
