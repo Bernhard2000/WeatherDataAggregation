@@ -31,13 +31,14 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/site
+          path: ${{env.DOTNET_ROOT}}/WeatherDataAggregation/App_Data
 
   deploy:
     runs-on: windows-latest
