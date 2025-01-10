@@ -27,11 +27,11 @@ jobs:
         run: dotnet workload restore
 
       - name: Build with dotnet
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
+        working-directory: ./WeatherDataAggregation
         run: dotnet build --configuration Release WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
+        working-directory: ./WeatherDataAggregation
         run: dotnet publish --configuration Release --output ./publish WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       
