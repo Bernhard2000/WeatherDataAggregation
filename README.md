@@ -1,6 +1,6 @@
 # Weather Data Aggregation
 
-This project is a weather data aggregation application built with C#. It fetches weather data from the Open Meteo API and displays it in various formats. The application makes use of asynchronous programming to ensure a smooth and responsive user experience.
+This project is a weather data aggregation application built with C#. It fetches weather data from the Open Meteo API and displays it in various formats. The application makes use of asynchronous programming to ensure a smooth and responsive user experience. (This README was partially generated with AI)
 
 ## Features
 
