@@ -32,7 +32,7 @@ jobs:
 
       - name: dotnet publish
         working-directory: ./WeatherDataAggregation/WeatherDataAggregation
-        run: dotnet publish --configuration Release --output ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        run: dotnet publish --configuration Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
 
 
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser
+          path: -o  ${{env.DOTNET_ROOT}}/WeatherDataAggregation/App_Data
 
   deploy:
     runs-on: windows-latest
