@@ -31,8 +31,8 @@ jobs:
         run: dotnet build --configuration Release WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
       - name: dotnet publish
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
-        run: dotnet publish --configuration Release -o ${{env.DOTNET_ROOT}}/WeatherDataAggregation/Browser WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation.Browser
+        run: dotnet publish --configuration Release WeatherDataAggregation.Browser/WeatherDataAggregation.Browser.csproj
 
 
 
