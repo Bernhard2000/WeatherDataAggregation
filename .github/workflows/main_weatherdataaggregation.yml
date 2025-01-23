@@ -23,7 +23,7 @@ jobs:
           include-prerelease: true
 
       - name: Restore workloads
-        working-directory: ./WeatherDataAggregation/WeatherDataAggregation
+        working-directory: ./WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation.Browser
         run: dotnet workload restore
 
       - name: Build with dotnet
@@ -34,7 +34,30 @@ jobs:
         working-directory: ./WeatherDataAggregation/WeatherDataAggregation/WeatherDataAggregation.Browser
         run: dotnet publish --configuration Release WeatherDataAggregation.Browser.csproj
 
-
+      - name: Prepare deployment artifact
+        working-directory: D:\a\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation\WeatherDataAggregation.Browser\bin\Release\net8.0-browser\browser-wasm\AppBundle
+        run: |
+          # Create web.config to enable static file serving
+          @echo ^<?xml version="1.0" encoding="UTF-8"?^> > web.config
+          @echo ^<configuration^> >> web.config
+          @echo   ^<system.webServer^> >> web.config
+          @echo     ^<staticContent^> >> web.config
+          @echo       ^<mimeMap fileExtension=".*" mimeType="application/octet-stream" /^> >> web.config
+          @echo     ^</staticContent^> >> web.config
+          @echo     ^<rewrite^> >> web.config
+          @echo       ^<rules^> >> web.config
+          @echo         ^<rule name="SPA fallback routing" stopProcessing="true"^> >> web.config
+          @echo           ^<match url=".*" /^> >> web.config
+          @echo           ^<conditions logicalGrouping="MatchAll"^> >> web.config
+          @echo             ^<add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" /^> >> web.config
+          @echo             ^<add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" /^> >> web.config
+          @echo           ^</conditions^> >> web.config
+          @echo           ^<action type="Rewrite" url="index.html" /^> >> web.config
+          @echo         ^</rule^> >> web.config
+          @echo       ^</rules^> >> web.config
+          @echo     ^</rewrite^> >> web.config
+          @echo   ^</system.webServer^> >> web.config
+          @echo ^</configuration^> >> web.config
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
