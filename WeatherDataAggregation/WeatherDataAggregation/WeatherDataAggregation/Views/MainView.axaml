@@ -22,21 +22,25 @@
             </Grid.ColumnDefinitions>
             
             <StackPanel Grid.Column="0">
-                <StackPanel HorizontalAlignment="Left">
+                <StackPanel HorizontalAlignment="Stretch">
                     <Label Content="From Date:" />
-                    <DatePicker SelectedDate="{Binding DateFrom}"></DatePicker>
+                    <DatePicker HorizontalAlignment="Stretch" SelectedDate="{Binding DateFrom}"></DatePicker>
                     <Label Content="To Date:" />
-                    <DatePicker SelectedDate="{Binding DateTo}"></DatePicker>
+                    <DatePicker HorizontalAlignment="Stretch" SelectedDate="{Binding DateTo}"></DatePicker>
                     <!--<Label Content="Vergleich mit"></Label>
                     <ComboBox ItemsSource="{Binding CompareYears}" SelectedItem="{Binding CompareYearsSelection}">
                     </ComboBox>-->
                 </StackPanel>
                
-                <StackPanel Margin= "0 10 0 10" HorizontalAlignment="Left" Orientation="Vertical">
-                    <StackPanel HorizontalAlignment="Left"  Orientation="Horizontal">
-                        <TextBox Width="200" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
-                        <Button Margin="5 0 0 0" Command="{Binding SearchLocationCommand}">Search</Button>
-                    </StackPanel>
+                <StackPanel Margin= "0 10 0 10" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" HorizontalAlignment="Stretch" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+                        <Button Grid.Column="1" Margin="5 0 0 0" Command="{Binding SearchLocationCommand}">Search</Button>
+                    </Grid>
                     <ComboBox Margin="0 5 0 0" HorizontalAlignment="Left" Name="LocationDropdown" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
                 </StackPanel>
                 <Button Content="Add to Collection" Command="{Binding RefreshCommand}" />
@@ -70,21 +74,21 @@
                     <TabItem Header="Hourly">
                         <StackPanel>
                         <!-- Add your controls for hourly data here -->
-                        <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
+                        <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureLines" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding TemperatureLines}" XAxes="{Binding XAxes}" ZoomMode="X"/>
                         </StackPanel>
                     </TabItem>
                     <TabItem Header="Daily">
                         <StackPanel>
-                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
-                            <avalonia:CartesianChart Title="{Binding TitleMaximumTemperature}" x:Name="MaximumTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding MaximumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
-                            <avalonia:CartesianChart Title="{Binding TitleMinimumTemperature}" x:Name="MinimumTempDaily" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding MinimumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempDaily" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding AverageTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleMaximumTemperature}" x:Name="MaximumTempDaily" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding MaximumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleMinimumTemperature}" x:Name="MinimumTempDaily" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding MinimumTemperatures}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
 
                         </StackPanel>
                         <!-- Add your controls for daily data here -->
                     </TabItem>
                     <TabItem Header="Monthly">
                         <StackPanel>
-                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempMonthly" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding AverageTemperaturesMonthly}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
+                            <avalonia:CartesianChart Title="{Binding TitleAverageTemperature}" x:Name="AverageTempMonthly" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding AverageTemperaturesMonthly}" XAxes="{Binding XAxesAverages}" ZoomMode="X"/>
                         </StackPanel>
                         <!-- Add your controls for daily data here -->
                     </TabItem>
@@ -101,12 +105,16 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             
-            <StackPanel Grid.Column="0">
-                <StackPanel Margin= "0 0 0 10" HorizontalAlignment="Left" Orientation="Vertical">
-                    <StackPanel HorizontalAlignment="Left"  Orientation="Horizontal">
-                        <TextBox Width="200" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
-                        <Button Margin="5 0 0 0" Command="{Binding SearchLocationCommand}">Search</Button>
-                    </StackPanel>
+            <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
+                <StackPanel Margin= "0 0 0 10" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" HorizontalAlignment="Stretch" Watermark="Search Location" Text="{Binding LocationSearchQuery, Mode=TwoWay}"></TextBox>
+                        <Button Grid.Column="1" Margin="5 0 0 0" Command="{Binding SearchLocationCommand}" HorizontalAlignment="Right">Search</Button>
+                    </Grid>
                     <ComboBox Margin="0 5 0 0" HorizontalAlignment="Left" Name="LocationDropdownForecast" ItemsSource="{Binding LocationSearchResults}" SelectedItem="{Binding SelectedLocation, Mode=TwoWay}"/>
                 </StackPanel>
                 <Button Content="Add to Collection" Command="{Binding RefreshCommand}" />
@@ -124,8 +132,8 @@
                 
                   </StackPanel>
             <StackPanel Grid.Column="1">
-                <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureForecastLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding TemperatureForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
-                <avalonia:CartesianChart Title="{Binding TitlePrecipitation}" x:Name="PrecipitationForecastLines" Height="300" Width="800" HorizontalAlignment="Center" VerticalAlignment="Center" Series="{Binding PrecipitationForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
+                <avalonia:CartesianChart Title="{Binding TitleTemperature}" x:Name="TemperatureForecastLines" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding TemperatureForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
+                <avalonia:CartesianChart Title="{Binding TitlePrecipitation}" x:Name="PrecipitationForecastLines" Height="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" Series="{Binding PrecipitationForecastLines}" XAxes="{Binding XAxesForecast}" ZoomMode="X"/>
 
             </StackPanel>
             </Grid>
